@@ -9,11 +9,10 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
-    if (!message.trim()) return; // Prevent empty messages
+    if (!message.trim()) return;
 
     setIsLoading(true);
 
-    // Add user message to chat
     setChatHistory((prev) => [...prev, { role: "user", content: message }]);
 
     chrome.tabs.captureVisibleTab(null, { format: "png" }, async (dataUrl) => {
