@@ -3,6 +3,7 @@ import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
 import "./Popup.css";
 import Account from "./Account";
 import Chat from "./Chat";
+import PasswordModal from "./PasswordModal";
 
 async function encryptData(password, data) {
   const enc = new TextEncoder();
@@ -70,31 +71,19 @@ async function decryptData(password, encryptedData) {
 }
 
 export default function WalletManager() {
-  const [wallet, setWallet] = useState(null);
+  const [decryptedWallet, setDecryptedWallet] = useState(null);
   const [password, setPassword] = useState("");
-  const [mnemonic, setMnemonic] = useState("");
   const [error, setError] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [walletExists, setWalletExists] = useState(false);
 
   useEffect(() => {
     if (typeof chrome !== "undefined" && chrome.storage) {
       chrome.storage.local.get(["naniWalletMnemonic"], async (result) => {
         if (result.naniWalletMnemonic) {
-          const userPassword = prompt("Enter your wallet password:");
-          if (userPassword) {
-            try {
-              const decryptedMnemonic = await decryptData(
-                userPassword,
-                result.naniWalletMnemonic,
-              );
-              const account = mnemonicToAccount(decryptedMnemonic);
-              setMnemonic(decryptedMnemonic);
-              setWallet(account);
-            } catch (err) {
-              console.error("Failed to decrypt mnemonic", err);
-              setError("Incorrect password or data corrupted.");
-            }
-          }
+          setWalletExists(true);
+          setShowPasswordModal(true);
         }
         setIsLoaded(true);
       });
@@ -103,6 +92,22 @@ export default function WalletManager() {
       setError("Chrome extension API not available");
     }
   }, []);
+
+  const handlePasswordSubmit = async (userPassword) => {
+    try {
+      const storedData = await chrome.storage.local.get(["naniWalletMnemonic"]);
+      const decryptedMnemonic = await decryptData(
+        userPassword,
+        storedData.naniWalletMnemonic,
+      );
+      const account = mnemonicToAccount(decryptedMnemonic);
+      setDecryptedWallet({ mnemonic: decryptedMnemonic, account });
+      setShowPasswordModal(false);
+    } catch (err) {
+      console.error("Failed to decrypt mnemonic", err);
+      setError("Incorrect password or data corrupted.");
+    }
+  };
 
   const handleCreateWallet = async () => {
     if (!password) {
@@ -121,8 +126,7 @@ export default function WalletManager() {
       const naniWalletMnemonic = await encryptData(password, newMnemonic);
       chrome.storage.local.set({ naniWalletMnemonic }, () => {
         console.log("Wallet saved securely.");
-        setWallet(account);
-        setMnemonic(newMnemonic);
+        setDecryptedWallet({ mnemonic: newMnemonic, account });
       });
     } catch (err) {
       console.error("Encryption failed", err);
@@ -137,36 +141,40 @@ export default function WalletManager() {
     return <div>Loading...</div>;
   }
 
-  let display = (
-    <div className="wallet-create">
-      <h2>Nani Wallet</h2>
-      <div>
-        <label>
-          Choose a password for encryption:
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-      </div>
-      <button onClick={handleCreateWallet}>Create Wallet</button>
-    </div>
-  );
-
-  if (wallet) {
-    display = (
-      <>
-        <Account wallet={wallet} />
-        <Chat />
-      </>
-    );
-  }
-
   return (
-    <>
-      {display}
-      <img src={"/default.png"} />
-    </>
+    <div>
+      {/* If a wallet exists, only show the password modal until it is decrypted */}
+      {walletExists && showPasswordModal && (
+        <PasswordModal onSubmit={handlePasswordSubmit} />
+      )}
+
+      {/* If no wallet exists and nothing is decrypted yet, show the create wallet UI */}
+      {!walletExists && !decryptedWallet && (
+        <div className="wallet-create">
+          <h2>Nani Wallet</h2>
+          <div>
+            <label>
+              Choose a password for encryption:
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
+          </div>
+          <button onClick={handleCreateWallet}>Create Wallet</button>
+        </div>
+      )}
+
+      {/* When the wallet is decrypted, show the account and chat UI */}
+      {decryptedWallet && (
+        <>
+          <Account wallet={decryptedWallet.account} />
+          <Chat />
+        </>
+      )}
+
+      <img src={"/default.png"} alt="Default" />
+    </div>
   );
 }

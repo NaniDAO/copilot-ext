@@ -10,7 +10,7 @@ export default function Account({ wallet }) {
         {wallet ? wallet?.address : "No Address"}
       </div>
       <span> / </span>
-      <div className="connection-status">{chain?.name || "Not Connected"}</div>
+      <div className="connection-status">{chain?.name || "EVM"}</div>
     </div>
   );
 }

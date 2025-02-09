@@ -44,6 +44,25 @@ code {
     border-radius: 2px;
 }
 
+input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-size: 13px;
+}
+
+button {
+    padding: 4px 12px;
+    background-color: cyan;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
 .info {
     position: absolute;
     bottom: 0;
@@ -52,6 +71,5 @@ code {
 
 .wallet-create {
     padding: 10px;
-    background: cyan;
     border-radius: 8px;
 }

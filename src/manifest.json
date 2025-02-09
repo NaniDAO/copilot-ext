@@ -19,5 +19,5 @@
     "{{firefox}}.scripts": ["src/background.js"]
   },
   "host_permissions": ["https://rpc.ankr.com/*"],
-  "permissions": ["storage", "https://rpc.ankr.com/*"]
+  "permissions": ["storage", "activeTab", "https://rpc.ankr.com/*"]
 }

@@ -1,6 +1,12 @@
 .account-container {
     display: flex;
     flex-direction: row;
+    gap: 5px;
+    border: 1px solid black;
+    height: fit-content;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 10px;
 }
 
 .connection-status,
