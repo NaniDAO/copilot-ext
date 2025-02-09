@@ -1,0 +1,18 @@
+.account-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.connection-status,
+.address-display {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    color: cyan;
+}
+
+.connection-status span,
+.address-display span {
+    color: black;
+    font-weight: 500;
+    margin-left: 0.25rem;
+}

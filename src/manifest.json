@@ -17,5 +17,7 @@
   "background": {
     "{{chrome}}.service_worker": "src/background.js",
     "{{firefox}}.scripts": ["src/background.js"]
-  }
+  },
+  "host_permissions": ["https://rpc.ankr.com/*"],
+  "permissions": ["storage", "https://rpc.ankr.com/*"]
 }
